@@ -6,9 +6,12 @@ import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ProxyURLStreamHandler extends URLStreamHandler {
 	
+	public static Map<String, URLStreamHandler> handlers = new HashMap<>();
 	public static Method openCon;
 	public static Method openConP;
 	static
@@ -38,26 +41,10 @@ public class ProxyURLStreamHandler extends URLStreamHandler {
 		u = ProxyRegistry.proxify(u);
         try 
         {
-            String clsName = "sun.net.www.protocol." + u.getProtocol() +".Handler";
-            Class<?> cls = null;
-            try
-            {
-                cls = Class.forName(clsName);
-            } 
-            catch (ClassNotFoundException e)
-            {
-                ClassLoader cl = ClassLoader.getSystemClassLoader();
-                if (cl != null)
-                {
-                    cls = cl.loadClass(clsName);
-                }
-            }
-            if (cls != null) 
-            {
-                URLStreamHandler sunImpl = ((URLStreamHandler)cls.newInstance());
-                return (URLConnection) openConP.invoke(sunImpl, u, p);
-            }
-        } 
+        	String protocol = u.getProtocol();
+        	URLStreamHandler handler = this.getURLStreamHandler(protocol);
+        	return (URLConnection) openConP.invoke(handler, u, p);
+        }
         catch (Exception e)
         {
             e.printStackTrace();
@@ -71,31 +58,44 @@ public class ProxyURLStreamHandler extends URLStreamHandler {
 		u = ProxyRegistry.proxify(u);
         try 
         {
-            String clsName = "sun.net.www.protocol." + u.getProtocol() +".Handler";
-            Class<?> cls = null;
-            try
-            {
-                cls = Class.forName(clsName);
-            } 
-            catch (ClassNotFoundException e) 
-            {
-                ClassLoader cl = ClassLoader.getSystemClassLoader();
-                if (cl != null)
-                {
-                    cls = cl.loadClass(clsName);
-                }
-            }
-            if (cls != null) 
-            {
-                URLStreamHandler sunImpl = ((URLStreamHandler)cls.newInstance());
-                return (URLConnection) openCon.invoke(sunImpl, u);
-            }
-        } 
+        	String protocol = u.getProtocol();
+        	URLStreamHandler handler = this.getURLStreamHandler(protocol);
+        	return (URLConnection) openCon.invoke(handler, u);
+        }
         catch (Exception e)
         {
             e.printStackTrace();
         }
         return null;
+	}
+	
+	public URLStreamHandler getURLStreamHandler(String protocol) throws Exception 
+	{
+		URLStreamHandler h = handlers.get(protocol);
+		if(h == null)
+		{
+	        String clsName = "sun.net.www.protocol." + protocol +".Handler";
+	        Class<?> cls = null;
+	        try
+	        {
+	            cls = Class.forName(clsName);
+	        } 
+	        catch (ClassNotFoundException e)
+	        {
+	            ClassLoader cl = ClassLoader.getSystemClassLoader();
+	            if (cl != null)
+	            {
+	                cls = cl.loadClass(clsName);
+	            }
+	        }
+	        if (cls != null) 
+	        {
+	            URLStreamHandler sunImpl = ((URLStreamHandler)cls.newInstance());
+	            handlers.put(protocol, sunImpl);
+	            return sunImpl;
+	        }
+		}
+		return h;
 	}
 
 }
