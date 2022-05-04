@@ -1,0 +1,18 @@
+#when offline or new is null the opperation doesn't fire
+#tags:[old,new,offline,method]
+#method is either replace or append
+#offline fires when the host in the new tag is offline
+
+old:http://minecraft.net/skin
+new:http://betacraft.uk/skin
+offline:file://%appdata%/.betacraft/skin
+method:append #append the old path starting after the /skin
+
+old:http://minecraft.net/resources
+new:file://%appdata%/.betacraft/proxy/resources.txt
+method:replace #replace the url instead of append it past a certain point
+
+old: http://minecraft.net
+new: http://betacraft.uk
+offline: file://%appdata%/.betacraft
+method: append #append the url's path the the rest of betacraft.uk
