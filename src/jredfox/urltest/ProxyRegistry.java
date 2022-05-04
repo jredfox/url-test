@@ -7,7 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProxyRegistry {
-	
+	/**
+	 * TODO:
+	 *  --proxy.forceHTTPS this flag will set all urls to use https instead of http
+		--proxy.removeWWW=list of domains seperated by ";"
+		--proxy.map=myProxyMap.txt list of urls change what to what. must contain the protocol and domain names. if the first url contains a path it will be a url to url replacement and will take priority over domain proxy changes
+	 */
 	public static List<IProxy<URL>> urlProxies = new ArrayList();
 	public static List<IProxy<File>> fileProxies = new ArrayList();
 	public static List<IProxy<Path>> pathProxies = new ArrayList();
